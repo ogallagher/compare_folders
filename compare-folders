@@ -1,0 +1,58 @@
+#!python3
+
+"""Expose compare_folders.py as executable cli tool
+"""
+
+import os
+import sys
+import subprocess as subp
+import logging
+
+def init_logger(level=logging.DEBUG) -> logging.Logger:
+    """Create and return logger.
+    """
+    
+    log = logging.getLogger('compare-folders')
+    log.setLevel(level)
+    log_formatter = logging.Formatter(fmt='{levelname}\t{name}.{funcName}.{lineno} {message}', style='{')
+    log_handler_out = logging.StreamHandler(sys.stdout)
+    log_handler_out.setFormatter(log_formatter)
+    log.addHandler(log_handler_out)
+    
+    return log
+# end def
+
+def main():
+    """Entrypoint method.
+    """
+    
+    log = init_logger()
+    
+    COMPARE_FOLDERS_DIRPATH, DRIVER_FILE = os.path.split(os.path.abspath(__file__))
+    COMPARE_FOLDERS_FILE = 'compare_folders.py'
+    # COMPARE_FOLDERS_FILE = 'test_target.py'
+    
+    shared_argv = sys.argv[1:]
+
+    log.debug(f'compare_folders dir = {COMPARE_FOLDERS_DIRPATH}')
+    log.debug(f'sys.argv = {" ".join(shared_argv)}')
+    
+    # execute compare_folders
+    cmd = [
+        'python3', 
+        os.path.join(COMPARE_FOLDERS_DIRPATH, COMPARE_FOLDERS_FILE)
+    ] + shared_argv
+    log.debug(' '.join(cmd))
+    
+    with subp.Popen(
+        cmd,
+        stdout=subp.PIPE,
+        stderr=subp.STDOUT,
+        text=True
+    ) as proc:
+        sys.stdout.write(proc.stdout.read())
+    # end subp
+# end def
+
+if __name__ == '__main__':
+    main()
